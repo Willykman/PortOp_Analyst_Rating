@@ -279,10 +279,89 @@ After backtesting and manual optimization, we found a significant increase in th
 ## [INSERT STREAMLIT HERE]
 
 [INSERT SCREENSHOTS OF STREAMLIT HERE]
-![Intro Image](read_me_images/logistic_regression_results.png) [INSERT STREAMLIT EXPLANATION OF RESULTS FOR THE MACHINE LEARNING MODELS HERE]
+![Intro Image](read_me_images/logistic_regression_results.png) 
+
+After incorporating the additional hyperparameters into the code, we observed a notable improvement in the accuracy scores for both the original and newly generated datasets. 
 
 ```
-[INSERT STREAMLIT CODE HERE]
+if Model == 'Random Forest':
+        st.subheader('The **Random Forest Regressor** is used to build a regression model using the **Random Forest** algorithm. Try adjusting the hyperparameters!')
+        st.write("## Apple - AAPL")
+        #define the ticker symbol
+        tickerSymbol ='AAPL'
+        #get data on this ticker
+        tickerData = yf.Ticker(tickerSymbol)
+        #get the historical prices for this ticker
+        tickerDf = tickerData.history(period='1d', start='2015-08-01', end='2023-08-01')
+        # Open	High	Low	Close	Volume	Dividends	Stock Splits
+
+        st.write("""
+        ## Closing Price
+        """)
+        st.line_chart(tickerDf.Close)
+        # Displays the dataset
+        st.subheader('Dataset')
+        
+        if uploaded_file is not None:  # Check if a file is uploaded
+            df = pd.read_csv(uploaded_file)
+            df.reset_index(drop=True, inplace=True)
+            df.drop(columns=["Unnamed: 0"], inplace=True)  
+            st.markdown('**Sample of dataset**')
+            st.write(df)
+
+            # Model building
+            X = df.iloc[:,:-1]  # Using all columns except for the last column as X
+            Y = df.iloc[:,-1]   # Selecting the last column as Y
+
+            # Data splitting
+            X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=(100-split_size)/100)
+
+            st.markdown('**Data splits**')
+            st.write('Training set')
+            st.info(X_train.shape)
+            st.write('Test set')
+            st.info(X_test.shape)
+
+            st.markdown('**Variable details**:')
+            st.write('X variable')
+            st.info(list(X.columns))
+            st.write('Y variable')
+            st.info(Y.name)
+
+            rf = RandomForestRegressor(n_estimators=parameter_n_estimators,
+            random_state=parameter_random_state,
+            max_features=parameter_max_features,
+            criterion=parameter_criterion,
+            min_samples_split=parameter_min_samples_split,
+            min_samples_leaf=parameter_min_samples_leaf,
+            bootstrap=parameter_bootstrap,
+            #oob_score=parameter_oob_score,
+            n_jobs=parameter_n_jobs)
+            rf.fit(X_train, Y_train)
+
+            st.subheader('Model Performance')
+
+            st.markdown('**Training set**')
+            Y_pred_train = rf.predict(X_train)
+            st.write('Train Accuracy Score:')
+            st.info( r2_score(Y_train, Y_pred_train) )
+
+            st.write('Error (MSE or MAE):')
+            st.info( mean_squared_error(Y_train, Y_pred_train) )
+
+            st.markdown('**Test set**')
+            Y_pred_test = rf.predict(X_test)
+            st.write('Test Accuracy Score:')
+            st.info( r2_score(Y_test, Y_pred_test) )
+
+            st.write('Error (MSE or MAE):')
+            st.info( mean_squared_error(Y_test, Y_pred_test) )
+
+            st.subheader('Model Parameters')
+            st.write(rf.get_params())
+               
+        else:
+            st.write("Upload a CSV file to start model training.")
 ```
 
 ## Next Steps 
